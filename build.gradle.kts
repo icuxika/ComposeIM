@@ -1,5 +1,6 @@
 import org.jetbrains.compose.ExperimentalComposeLibrary
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
@@ -31,6 +32,7 @@ dependencies {
 compose.desktop {
     application {
         mainClass = "MainKt"
+        jvmArgs("--enable-preview", "--enable-native-access=ALL-UNNAMED", "-Dsun.stdout.encoding=UTF-8")
 
         nativeDistributions {
             windows {
@@ -48,4 +50,15 @@ compose.desktop {
             vendor = "My Manufacturer Name"
         }
     }
+}
+
+tasks.withType<KotlinCompile> {
+    kotlinOptions {
+        jvmTarget = "21"
+    }
+}
+
+tasks.withType<JavaCompile> {
+    options.release.set(21)
+    options.compilerArgs.add("--enable-preview")
 }

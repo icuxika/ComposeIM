@@ -149,7 +149,20 @@ private fun Modifier.cursorForVerticalResize(): Modifier =
     pointerHoverIcon(PointerIcon(Cursor(Cursor.N_RESIZE_CURSOR)))
 
 fun main() = application {
-    Window(onCloseRequest = ::exitApplication) {
-        App()
+    val globalKeyboardListener = GlobalKeyboardListener()
+    // 挂载全局键盘事件监听钩子
+    globalKeyboardListener.hook()
+
+    var isOpen by remember { mutableStateOf(true) }
+
+    if (isOpen) {
+        Window(onCloseRequest = {
+            // 窗口关闭时，卸载全局键盘事件监听钩子
+            globalKeyboardListener.stop()
+            isOpen = false
+            exitApplication()
+        }) {
+            App()
+        }
     }
 }
