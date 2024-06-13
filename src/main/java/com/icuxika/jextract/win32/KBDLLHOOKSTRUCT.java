@@ -2,16 +2,31 @@
 
 package com.icuxika.jextract.win32;
 
-/**
- * {@snippet :
- * typedef struct tagKBDLLHOOKSTRUCT KBDLLHOOKSTRUCT;
- *}
- */
-public final class KBDLLHOOKSTRUCT extends tagKBDLLHOOKSTRUCT {
+import java.lang.invoke.*;
+import java.lang.foreign.*;
+import java.nio.ByteOrder;
+import java.util.*;
+import java.util.function.*;
+import java.util.stream.*;
 
-    // Suppresses default constructor, ensuring non-instantiability.
-    private KBDLLHOOKSTRUCT() {
+import static java.lang.foreign.ValueLayout.*;
+import static java.lang.foreign.MemoryLayout.PathElement.*;
+
+/**
+ * {@snippet lang=c :
+ * typedef struct tagKBDLLHOOKSTRUCT {
+ *     DWORD vkCode;
+ *     DWORD scanCode;
+ *     DWORD flags;
+ *     DWORD time;
+ *     ULONG_PTR dwExtraInfo;
+ * } KBDLLHOOKSTRUCT
+ * }
+ */
+public class KBDLLHOOKSTRUCT extends tagKBDLLHOOKSTRUCT {
+
+    KBDLLHOOKSTRUCT() {
+        // Should not be called directly
     }
 }
-
 

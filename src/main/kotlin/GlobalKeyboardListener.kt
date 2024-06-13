@@ -15,11 +15,11 @@ class GlobalKeyboardListener {
             currentThreadId = GetCurrentThreadId()
             Arena.ofConfined().use { arena ->
                 hook = SetWindowsHookExW(WH_KEYBOARD_LL(), HOOKPROC.allocate({ code, wParam, lParam ->
-                    val kbDllHookStruct = KBDLLHOOKSTRUCT.ofAddress(
+                    val kbDllHookStruct = KBDLLHOOKSTRUCT.reinterpret(
                         MemorySegment.ofAddress(lParam),
                         arena
-                    )
-                    val vkCode = KBDLLHOOKSTRUCT.`vkCode$get`(kbDllHookStruct)
+                    ) { }
+                    val vkCode = KBDLLHOOKSTRUCT.vkCode(kbDllHookStruct)
                     if (vkCode >= 0) {
                         if (wParam == WM_KEYDOWN().toLong()) {
                             println("按下->${vkCode}")

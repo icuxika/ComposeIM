@@ -1,16 +1,16 @@
 import org.jetbrains.compose.ExperimentalComposeLibrary
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm")
-    id("org.jetbrains.compose")
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.jetbrainsCompose)
+    alias(libs.plugins.compose.compiler)
 }
 
 repositories {
+    google()
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-    google()
 }
 
 dependencies {
@@ -27,12 +27,15 @@ dependencies {
 
     // Include the Test API
     testImplementation(compose.desktop.uiTestJUnit4)
+
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
 }
 
 compose.desktop {
     application {
         mainClass = "MainKt"
-        jvmArgs("--enable-preview", "--enable-native-access=ALL-UNNAMED", "-Dsun.stdout.encoding=UTF-8")
+        jvmArgs("--enable-native-access=ALL-UNNAMED", "-Dsun.stdout.encoding=UTF-8")
 
         nativeDistributions {
             windows {
@@ -52,13 +55,6 @@ compose.desktop {
     }
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "21"
-    }
-}
-
-tasks.withType<JavaCompile> {
-    options.release.set(21)
-    options.compilerArgs.add("--enable-preview")
+kotlin {
+    jvmToolchain(22)
 }

@@ -16,9 +16,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import androidx.lifecycle.viewmodel.compose.viewModel
 import composeim.generated.resources.Res
 import composeim.generated.resources.compose_multiplatform
-import org.jetbrains.compose.resources.ExperimentalResourceApi
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.splitpane.ExperimentalSplitPaneApi
 import org.jetbrains.compose.splitpane.HorizontalSplitPane
@@ -26,23 +27,26 @@ import org.jetbrains.compose.splitpane.VerticalSplitPane
 import org.jetbrains.compose.splitpane.rememberSplitPaneState
 import ui.theme.AppTheme
 import ui.theme.ComposeIMTheme
+import util.FileDownloader
 import java.awt.Cursor
+import java.nio.file.Path
 
-@OptIn(ExperimentalSplitPaneApi::class, ExperimentalResourceApi::class)
+@OptIn(ExperimentalSplitPaneApi::class)
 @Composable
 @Preview
-fun App() {
+fun App(viewModel: AppViewModel = viewModel { AppViewModel() }) {
     val systemTheme = !isSystemInDarkTheme()
     var isDarkTheme by remember { mutableStateOf(systemTheme) }
-
-    var theme by remember { mutableStateOf(ComposeIMTheme.Theme.Light) }
 
     var text by remember { mutableStateOf("Hello, World!") }
 
     val splitterState = rememberSplitPaneState()
     val hSplitterState = rememberSplitPaneState()
 
-    AppTheme(theme) {
+    var progress by remember { mutableStateOf(0.45f) }
+    val scope = rememberCoroutineScope()
+
+    AppTheme(viewModel.theme) {
         Box(modifier = Modifier.fillMaxSize()) {
             Row {
                 Column(Modifier.width(48.dp).fillMaxHeight().background(ComposeIMTheme.colors.background)) {
@@ -58,7 +62,7 @@ fun App() {
                     }
 
                     IconButton(onClick = {
-                        theme = when (theme) {
+                        viewModel.theme = when (viewModel.theme) {
                             ComposeIMTheme.Theme.Light -> ComposeIMTheme.Theme.Dark
                             ComposeIMTheme.Theme.Dark -> ComposeIMTheme.Theme.Undefined
                             ComposeIMTheme.Theme.Undefined -> ComposeIMTheme.Theme.Light
@@ -76,9 +80,43 @@ fun App() {
                         "compose-multiplatform",
                         Modifier.background(ComposeIMTheme.colors.text)
                     )
+
+                    Button(onClick = {
+                        scope.launch {
+                            val fileURL =
+                                "https://dldir1.qq.com/qqfile/qq/QQNT/Windows/QQ_9.9.9_240403_x64_01.exe"
+                            val filePath =
+                                Path.of(System.getProperty("user.home")).resolve("Downloads").resolve("temp")
+                                    .resolve("result1.exe");
+                            FileDownloader.downloadFile(fileURL, filePath).collect {
+                                when (it) {
+                                    is FileDownloader.DownloadState.Downloading -> {
+                                        progress = it.progress
+                                    }
+
+                                    is FileDownloader.DownloadState.Success -> {
+                                        println("下载完成[${Thread.currentThread().name}]-->${it.result}")
+                                    }
+
+                                    is FileDownloader.DownloadState.Error -> {
+                                        println("下载失败[${Thread.currentThread().name}]-->${it.throwable.message}")
+                                    }
+                                }
+                            }
+                        }
+                    }) {
+                        Text("下载")
+                    }
                 }
 
                 Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                    LinearProgressIndicator(
+                        progress = {
+                            progress
+                        },
+                        modifier = Modifier.fillMaxWidth().height(24.dp).defaultMinSize(minHeight = 24.dp),
+                        color = Color.Blue
+                    )
                     HorizontalSplitPane(
                         splitPaneState = splitterState
                     ) {

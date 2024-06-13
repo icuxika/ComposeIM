@@ -7,4 +7,5 @@
 
 ```shell
 gradle generateComposeResClass
+gradle generateResourceAccessorsForMain
 ```
